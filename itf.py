@@ -1,22 +1,53 @@
+from selenium.webdriver.common.by import By
+from seleniumwire import webdriver
 import requests
 import time
 import json
+
+options = {'enable_har': True,}
 
 rank_dict = {}
 player_list = []
 mapped_dict = {}
 
+found_cookie = None
+found_url = None
 
-lastUpdateTime = '2/3/2025'
-nextUpdateTime = '2/10/2025'
+lastUpdateTime = '2/10/2025'
+nextUpdateTime = '2/17/2025'
+
+driver = webdriver.Chrome(seleniumwire_options=options)
+driver.get("https://ipin.itftennis.com")
+
+input("Hit enter once you have navigated to the tournament you want to check the seeding for! ")
+
+tournamentName = driver.find_element(By.XPATH, "/html/body/main/div/div/div/header/h1").text
+date = driver.find_element(By.XPATH, "/html/body/main/div/div/div/header/div").text
+
+for request in driver.requests:
+    if request.url.startswith("https://ipin.itftennis.com/Umbraco/Surface/entrylist/entry-list?tennisEventId"):
+        cookies = request.headers.get('Cookie')
+        if cookies:
+            found_url = request.url
+            found_cookie = cookies
+            break
+
+if found_cookie:
+    print("Scraping Successful!")
+else:
+    print("No matching URL or cookie detected.")
+
+driver.quit()
 
 print(f"Rankings last updated: {lastUpdateTime}, Next update: {nextUpdateTime}")
-tournament = input("enter tournament name (e.g. J100VEGAS): ")
-date = input ("enter date of tournament start (DO NOT USE '/' !!): ")
-tournamentList = input("enter tournament entry list URL (USE PROVIDED 'captureEntryURL.js' FILE!!!): ")
-cookie = input("enter cookie (found when logging in, in the network tab): ")
+time.sleep(0.5)
+print(f"Tournament selected: {tournamentName}")
+time.sleep(0.5)
+print(f"Date period: {date}")
+time.sleep(0.5)
+print("Computing...")
 
-with open('ranks.json', 'r') as f:
+with open('ranks2-10-2025.json', 'r') as f:
     ranks = json.load(f)
 
 headers_entry = {
@@ -30,7 +61,7 @@ headers_entry = {
     "Sec-fetch-site":"same-origin",
     "Sec-fetch-user":"?1",
     "Upgrade-insecure-requests":"1",
-    "Cookie": cookie,
+    "Cookie": found_cookie,
 }
 
 def get_entries(url):
@@ -70,13 +101,13 @@ def map_ranks(ranks, entries):
 def get_value(item):
     return item[1]
 
-entries = get_entries(tournamentList)
+entries = get_entries(found_url)
 entries = parse_entries(entries)
 
 mapped_dict = map_ranks(ranks, entries)
 sorted_dict = dict(sorted(mapped_dict.items(), key=get_value))
 
-with open(f'seedingList-{tournament}-{date}.csv', 'w', encoding='utf-8') as f:
+with open(f'seedingList-{tournamentName}-{date}.csv', 'w', encoding='utf-8') as f:
     f.write("name,rank,seed\n")
     for i, (name, rank) in enumerate(sorted_dict.items(), start=1):
         f.write(f"{name},{rank},{i}\n")
