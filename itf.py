@@ -12,7 +12,7 @@ nextUpdateTime = '2/10/2025'
 
 print(f"Rankings last updated: {lastUpdateTime}, Next update: {nextUpdateTime}")
 tournament = input("enter tournament name (e.g. J100VEGAS): ")
-date = input ("enter date of tournament start: ")
+date = input ("enter date of tournament start (DO NOT USE '/' !!): ")
 tournamentList = input("enter tournament entry list URL (USE PROVIDED 'captureEntryURL.js' FILE!!!): ")
 cookie = input("enter cookie (found when logging in, in the network tab): ")
 
