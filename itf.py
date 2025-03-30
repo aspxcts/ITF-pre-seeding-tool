@@ -19,6 +19,7 @@ nextUpdateTime = '2/17/2025'
 driver = webdriver.Chrome(seleniumwire_options=options)
 driver.get("https://ipin.itftennis.com")
 
+rankfilename = input("enter file name with .json: ")
 input("Hit enter once you have navigated to the tournament you want to check the seeding for! ")
 
 tournamentName = driver.find_element(By.XPATH, "/html/body/main/div/div/div/header/h1").text
@@ -47,7 +48,7 @@ print(f"Date period: {date}")
 time.sleep(0.5)
 print("Computing...")
 
-with open('ranks2-10-2025.json', 'r') as f:
+with open(rankfilename, 'r') as f:
     ranks = json.load(f)
 
 headers_entry = {
